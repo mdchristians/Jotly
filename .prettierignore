@@ -1,0 +1,4 @@
+babel.config.json
+jest.config.js
+prettier.config.js
+webpack.config.js
