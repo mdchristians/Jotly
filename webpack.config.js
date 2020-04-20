@@ -3,6 +3,8 @@ const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ManifestPlugin = require('webpack-manifest-plugin');
 const Dotenv = require('dotenv-webpack');
+const TerserPlugin = require('terser-webpack-plugin');
+const CompressionPlugin = require('compression-webpack-plugin');
 
 module.exports = env => {
 	const isDev = env === 'development';
@@ -25,10 +27,47 @@ module.exports = env => {
       filename: isProd ? '[name].[contenthash:8].js' : 'bundle.js',
       futureEmitAssets: true,
       chunkFilename: isProd ? '[name].[contenthash:8].chunk.js' : '[name].chunk.js',
+      globalObject: 'this',
 		},
 		resolve: {
 		  extensions: ['.js'],
-		},
+    },
+    optimization: {
+      minimize: isProd,
+      minimizer: [
+        new TerserPlugin({
+          extractComments: true,
+          terserOptions: {
+            parse: {
+              ecma: 8,
+            },
+            compress: {
+              ecma: 5,
+              warnings: false,
+              comparisons: false,
+              inline: 2,
+            },
+            mangle: {
+              safari10: true,
+            },
+            keep_classnames: isProd && process.argv.includes('--profile'), // Devtools profiling
+            keep_fnames: isProd && process.argv.includes('--profile'),     // Devtools profiling
+            output: {
+              ecma: 5,
+              comments: false,
+              ascii_only: true,
+            },
+          }
+        }),
+      ],
+      splitChunks: {
+        chunks: 'all',
+        name: false,
+      },
+      runtimeChunk: {
+        name: entrypoint => `runtime-${entrypoint.name}`,
+      },
+    },
 		module: {
 			strictExportPresence: true,
 		  rules: [
@@ -113,7 +152,20 @@ module.exports = env => {
       }),
       new Dotenv({
         systemvars: isProd
-      })
-		].filter(Boolean),
+      }),
+      new CompressionPlugin({
+        test: /\.(html|css|js)(\?.*)?$/i,
+      }),
+    ].filter(Boolean),
+    node: {
+      module: 'empty',
+      dgram: 'empty',
+      dns: 'mock',
+      fs: 'empty',
+      http2: 'empty',
+      net: 'empty',
+      tls: 'empty',
+      child_process: 'empty',
+    },
 	}
 }
