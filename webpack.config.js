@@ -111,7 +111,9 @@ module.exports = env => {
           };
         },
       }),
-      new Dotenv()
-		],
+      new Dotenv({
+        systemvars: isProd
+      })
+		].filter(Boolean),
 	}
 }
