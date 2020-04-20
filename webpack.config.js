@@ -30,7 +30,11 @@ module.exports = env => {
       globalObject: 'this',
 		},
 		resolve: {
-		  extensions: ['.js'],
+      extensions: ['.js'],
+      alias: {
+        'react-dom$': 'react-dom/profiling',
+        'scheduler/tracing': 'scheduler/tracing-profiling',
+      },
     },
     optimization: {
       minimize: isProd,
