@@ -1,1 +1,1 @@
-export default from './JotlyRouter';
+export { default } from  './JotlyRouter';

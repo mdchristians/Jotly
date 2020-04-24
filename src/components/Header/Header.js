@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Stack, Avatar, Link } from "@chakra-ui/core";
+import { navigate } from '@reach/router';
 
 const Header = () => (
   <Box
@@ -10,7 +11,7 @@ const Header = () => (
     justifyContent="space-between"
     px="5"
   >
-    <Stack isInline shouldWrapChildren alignItems="center" spacing={3}>
+    <Stack isInline shouldWrapChildren alignItems="center" spacing={3} onClick={() => navigate('/')}>
       <Avatar
         size="md"
         name="J"

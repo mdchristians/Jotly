@@ -1,5 +1,6 @@
 import React from 'react';
 import { render } from 'react-dom';
+import firebase from 'firebase/app';
 import Jotly from './Jotly';
 
 import 'firebase/auth';

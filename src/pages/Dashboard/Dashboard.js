@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import dayjs from 'dayjs';
-import { Grid, Spinner } from "@chakra-ui/core";
+import { Grid, Spinner, useToast } from "@chakra-ui/core";
 import { navigate } from '@reach/router';
 import NotebookBlock from './components/NotebookBlock';
 import AddNotebookBlock from './components/AddNotebookBlock';
 import NotebooksEmptyState from './components/NotebooksEmptyState';
 import { useAuth } from '../../hooks/useAuth';
 import { Db } from '../../config/firebase';
+import { useNotebook } from '../../hooks/useNotebook';
 
 const Dashboard = props => {
   const [notebooks, setNotebooks] = useState([]);
   const [fetched, setFetched] = useState(false);
-
+  const { createNotebook } = useNotebook();
+  const toast = useToast();
   const { user } = useAuth();
 
   useEffect(() => {
@@ -28,37 +29,42 @@ const Dashboard = props => {
       .catch(err => console.error(err));
   }, [user.userId])
 
-  const createNotebook = () => {
-    const notebookRef = Db.collection("notebooks").doc();
-    Db.collection("notebooks")
-      .doc(notebookRef.id)
-      .set({
-        id: notebookRef.id,
-        createdAt: dayjs().format(),
-        userId: user.userId
+  const onCreate = () => {
+    createNotebook()
+      .then(notebookId => {
+        navigate(`notebook/${notebookId}`);
       })
-      .then(() => {
-        navigate(`notebook/${notebookRef.id}`);
+      .catch(err => {
+        toast({
+          title: "An error occurred.",
+          description: "Unable to create notebook.",
+          status: "error",
+          duration: 9000,
+          isClosable: true,
+          position: "top-right"
+        })
       })
-      .catch(err => console.error(err))
-  }
-
-  const foobar = (nb) => {
-    navigate(`notebook/${nb.id}`);
   }
 
   if(fetched) {
     return (
-      <React.Fragment>
+      <>
         {notebooks.length > 0 ? (
           <Grid gap={8} templateColumns="repeat(auto-fit, minmax(250px, 1fr))">
-            {notebooks.map(nb => <NotebookBlock key={nb.id} title="Notebook Title" description="foo foo foo foo foo" onBlockClick={() => foobar(nb)} />)}
-            <AddNotebookBlock onBlockClick={createNotebook} />
+            {notebooks.map(notebook => (
+              <NotebookBlock 
+                key={notebook.id} 
+                title={notebook.title} 
+                description={notebook.description} 
+                onBlockClick={() => navigate(`notebook/${notebook.id}`)} 
+              />
+            ))}
+            <AddNotebookBlock onBlockClick={onCreate} />
           </Grid>
         ) : (
-          <NotebooksEmptyState onBlockClick={createNotebook} />
+          <NotebooksEmptyState onBlockClick={onCreate} />
         )}
-      </React.Fragment>
+      </>
     )
   }
   

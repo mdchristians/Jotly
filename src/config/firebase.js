@@ -13,3 +13,4 @@ firebase.initializeApp({
 
 export const Db = firebase.firestore();
 export const Auth = firebase.auth();
+export const getTimestamp = () => firebase.firestore.FieldValue.serverTimestamp();
